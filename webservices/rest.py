@@ -347,7 +347,8 @@ def create_app(test_config=None):
 
         try:
             messages = []
-            messages.extend(fetch_items('scheduled-maintenances/active.json', 'scheduled_maintenances', 'Maintenance'))
+            messages.extend(fetch_items(
+                'scheduled-maintenances/upcoming.json', 'scheduled_maintenances', 'Maintenance'))
             messages.extend(fetch_items('incidents/unresolved.json', 'incidents', 'Incident'))
             return ' '.join(messages) if messages else ""
         except Exception as e:
