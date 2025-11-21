@@ -1,4 +1,5 @@
 import random
+import threading
 import celery
 from flask_sqlalchemy import SQLAlchemy as SQLAlchemyBase
 from flask_sqlalchemy import session
@@ -10,6 +11,8 @@ class RoutingSession(session.Session):
 
     Based on http://techspot.zzzeek.org/2012/01/11/django-style-database-routers-in-sqlalchemy/
     """
+
+    _local = threading.local()
 
     @property
     def followers(self):
@@ -41,8 +44,10 @@ class RoutingSession(session.Session):
         return use_follower
 
     def get_bind(self, mapper=None, clause=None):
-        if self.use_follower:
-            return random.choice(self.followers)
+        if self.use_follower and self.followers:
+            if not hasattr(self._local, 'random'):
+                self._local.random = random.Random()
+            return self._local.random.choice(self.followers)
 
         return super().get_bind(mapper=mapper, clause=clause)
 
